@@ -13,14 +13,18 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
+            margin: 0;
         }
         .container {
-            width: 80%;
-            max-width: 800px;
+            width: 90%;
+            max-width: 1000px;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
         }
         .actions {
             display: flex;
@@ -36,13 +40,12 @@
         .file-list {
             list-style: none;
             padding: 0;
-            min-height: 200px;
+            flex-grow: 1;
+            overflow-y: auto;
             border: 2px dashed transparent;
             display: flex;
             flex-direction: column;
-        }
-        .file-list.dragover {
-            border-color: #ccc;
+            align-items: flex-start;
         }
         .file-item, .folder-item {
             padding: 10px;
@@ -56,6 +59,9 @@
         }
         .file-item i, .folder-item i {
             margin-right: 10px;
+        }
+        .dragging {
+            border: 2px dashed #007bff !important;
         }
     </style>
 </head>
@@ -117,14 +123,14 @@
         }
         function dragOverHandler(event) {
             event.preventDefault();
-            document.getElementById('fileList').classList.add('dragover');
+            document.getElementById('fileList').classList.add('dragging');
         }
         function dragLeaveHandler(event) {
-            document.getElementById('fileList').classList.remove('dragover');
+            document.getElementById('fileList').classList.remove('dragging');
         }
         function dropHandler(event) {
             event.preventDefault();
-            document.getElementById('fileList').classList.remove('dragover');
+            document.getElementById('fileList').classList.remove('dragging');
             const file = event.dataTransfer.files[0];
             if (file && file.type === "text/html") {
                 const reader = new FileReader();
