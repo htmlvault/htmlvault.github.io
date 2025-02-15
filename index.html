@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iCloud HTML Storage</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .icon-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+        .file-item, .folder-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #e0e0e5;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .file-item i, .folder-item i {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="actions">
+            <button class="icon-button" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-upload"></i>
+            </button>
+            <button class="icon-button" onclick="createFolder()">
+                <i class="fas fa-folder-plus"></i>
+            </button>
+        </div>
+        <input type="file" id="fileInput" accept=".html" style="display: none;">
+        <ul class="file-list" id="fileList"></ul>
+    </div>
+    <script>
+        let files = JSON.parse(localStorage.getItem('files')) || [];
+        function saveFiles() {
+            localStorage.setItem('files', JSON.stringify(files));
+        }
+        function renderFiles() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            files.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.className = file.type === 'folder' ? 'folder-item' : 'file-item';
+                li.innerHTML = `<i class='${file.type === 'folder' ? 'fas fa-folder' : 'fas fa-file-code'}'></i> ${file.name}`;
+                li.onclick = () => openFile(index);
+                fileList.appendChild(li);
+            });
+        }
+        function openFile(index) {
+            const file = files[index];
+            if (file.type === 'html') {
+                const newWindow = window.open();
+                newWindow.document.write(atob(file.content));
+            }
+        }
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    files.push({ name: file.name, content: btoa(e.target.result), type: 'html' });
+                    saveFiles();
+                    renderFiles();
+                };
+                reader.readAsText(file);
+            }
+        });
+        function createFolder() {
+            const folderName = prompt("Enter folder name:");
+            if (folderName) {
+                files.push({ name: folderName, type: 'folder' });
+                saveFiles();
+                renderFiles();
+            }
+        }
+        renderFiles();
+    </script>
+</body>
+</html>
